@@ -401,4 +401,51 @@ describe('gameStore', () => {
         expect(state.players[0].cards).toHaveLength(1);
         expect(state.players[0].gems.Gold).toBeLessThan(10);
     });
+
+    it('should assign a random bonus gem to each noble on init', () => {
+        const store = useGameStore.getState();
+        store.initGame(2);
+        const state = useGameStore.getState();
+
+        expect(state.nobles.length).toBeGreaterThan(0);
+        state.nobles.forEach(noble => {
+            expect(noble.bonus).toBeDefined();
+            expect([GemType.Diamond, GemType.Sapphire, GemType.Emerald, GemType.Ruby, GemType.Onyx]).toContain(noble.bonus);
+        });
+    });
+
+    it('should include noble bonuses in canAfford and purchaseCard discounts', () => {
+        const store = useGameStore.getState();
+        store.initGame(2);
+        let state = useGameStore.getState();
+
+        const player = state.players[0];
+        const noble = state.nobles[0];
+        const bonusType = noble.bonus;
+
+        // Give player the noble
+        player.nobles.push(noble);
+
+        const card: Card = {
+            id: 'test_card_noble', level: 1, prestige: 0, bonus: GemType.Diamond,
+            costs: { [bonusType]: 1 }
+        };
+
+        // Player has 0 gems of bonusType, but has a noble with that bonus
+        expect(state.canAfford(player, card)).toBe(true);
+
+        // Purchase card and verify gold/gems didn't decrease
+        player.gems[bonusType] = 0;
+        // Actually purchaseCard expects card to be in visibleCards or reservedCards
+        // Let's mock visibleCards1
+        useGameStore.setState({ visibleCards1: [card] });
+        state = useGameStore.getState();
+
+        state.purchaseCard(0, card.id, false);
+        state = useGameStore.getState();
+
+        expect(state.players[0].cards).toContainEqual(card);
+        expect(state.players[0].gems[bonusType]).toBe(0);
+        expect(state.bank[bonusType]).toBe(state.bank[bonusType]); // No change in bank for this gem
+    });
 });

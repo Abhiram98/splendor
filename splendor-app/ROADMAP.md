@@ -14,7 +14,7 @@ This roadmap outlines the development progress and future goals for the Splendor
     - [x] `purchaseCard`: Cost calculation including bonuses and gold.
 - [x] **Turn Flow**: Automatic turn switching and noble visit detection.
 - [x] **Win Condition**: Track prestige points and identify the winner.
-- [ ] **Noble yields a gem value**
+- [x] **Noble yields a gem value**
 
 ## Bugs Fixes:
 - [x] **Bank shouldn't go negative**: Bank value for any gem type shouldn't be negative.
@@ -25,6 +25,8 @@ This roadmap outlines the development progress and future goals for the Splendor
 - [x] **Player shouldn't be able to take the gold gem without reserving a card**
 - [x] **Player shouldn't be able to reserve more than 3 cards**
 - [x] **Along with the right-click to reserve a card, there should be a button to reserve a card**
+- [ ] **Hovering over the gold gem shouldn't change the cursor to make it seem clickable**
+- [x] **A noble's value should be displayed in the same way as a card's value**
 
 ## Phase 2: User Interface & User Experience 🏗️
 - [x] **Base Layout**: Responsive grid for the game board.
@@ -48,6 +50,7 @@ This roadmap outlines the development progress and future goals for the Splendor
 - [ ] **Coverage Goal**: Achieve 100% method and branch coverage (Current focus).
 
 ## Phase 4: Advanced Features 📅
+- [ ] **If there are multiple ways to purchase a card, the player should be able to choose which way to purchase it**: e.g. if they have a gold gem and can afford the card with or without the gold gem, they should be able to choose which way to purchase it.
 - [ ] **Persistence**: Save game state to `localStorage` to resume sessions.
 - [ ] **Game Settings**: Support for player count selection and custom names.
 - [ ] **Move History**: A sidebar log of actions with "Undo" capability.

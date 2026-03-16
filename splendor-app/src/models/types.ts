@@ -25,6 +25,7 @@ export interface Noble {
     id: string;
     prestige: number;
     requirements: Partial<Record<Exclude<GemType, 'Gold'>, number>>;
+    bonus: GemType;
 }
 
 export interface Player {

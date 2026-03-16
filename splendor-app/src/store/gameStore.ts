@@ -65,7 +65,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
         });
         bank[GemType.Gold] = 5;
 
-        const nobles = shuffle(NOBLES).slice(0, numPlayers + 1);
+        const selectedNobles = shuffle(NOBLES).slice(0, numPlayers + 1);
+        const gemTypes = [GemType.Diamond, GemType.Sapphire, GemType.Emerald, GemType.Ruby, GemType.Onyx];
+        const nobles = selectedNobles.map(n => ({
+            ...n,
+            bonus: gemTypes[Math.floor(Math.random() * gemTypes.length)]
+        }));
 
         set({
             players,
@@ -85,6 +90,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const playerDiscounts = createEmptyGems();
         player.cards.forEach(c => {
             playerDiscounts[c.bonus] += 1;
+        });
+        player.nobles.forEach(n => {
+            playerDiscounts[n.bonus] += 1;
         });
 
         for (const [gem, cost] of Object.entries(card.costs)) {
@@ -257,6 +265,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
             const playerDiscounts = createEmptyGems();
             newP.cards.forEach(c => { playerDiscounts[c.bonus] += 1; });
+            newP.nobles.forEach(n => { playerDiscounts[n.bonus] += 1; });
             let goldNeeded = 0;
 
             for (const [gem, cost] of Object.entries(card!.costs)) {
@@ -338,7 +347,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 p.nobles = [...p.nobles, noble];
                 p.prestige += noble.prestige;
                 newState.nobles = newState.nobles.filter((_, i) => i !== visitingNobleIdx);
-                newState.history = [...newState.history, `${p.name} was visited by a Noble!`];
+                newState.history = [...newState.history, `${p.name} was visited by a Noble! (yields ${noble.bonus} bonus)`];
             }
 
             newState.players = [...newState.players];

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { GameCard } from './Card';
+import { NobleCard } from './NobleCard';
 import Bank from './Bank';
 import { PlayerMat } from './PlayerMat';
 
@@ -48,16 +49,9 @@ export const Board: React.FC = () => {
                 )}
 
                 <h2>Nobles</h2>
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                     {nobles.map(noble => (
-                        <div key={noble.id} className="noble-tile">
-                            <div style={{ textAlign: 'center', fontSize: '1.2rem' }}>⭐ {noble.prestige}</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                {Object.entries(noble.requirements).map(([gem, amount]) => (
-                                    <div key={gem} style={{ fontSize: 12 }}>{amount} {(gem as string).substring(0, 3)}</div>
-                                ))}
-                            </div>
-                        </div>
+                        <NobleCard key={noble.id} noble={noble} />
                     ))}
                 </div>
 

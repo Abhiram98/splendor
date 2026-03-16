@@ -65,19 +65,22 @@ body {
   box-shadow: var(--shadow-md);
 }
 
-/* Noble Tile */
-.noble-tile {
-  background-color: var(--surface-noble);
-  border-radius: 6px;
-  box-shadow: var(--shadow-md);
-  color: #f8f9fa;
-  border: 2px solid #5a5a5a;
-  display: flex;
-  flex-direction: column;
-  padding: 8px;
+/* Noble Tile / Card */
+.noble-card {
   width: 90px;
   height: 90px;
-  justify-content: space-between;
+  background-color: var(--surface-noble);
+  color: #f8f9fa;
+  border: 2px solid #5a5a5a;
+}
+
+.noble-card .card-prestige {
+  color: #f8f9fa;
+}
+
+.noble-card .card-header {
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* physical Token */
