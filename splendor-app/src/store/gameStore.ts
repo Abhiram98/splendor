@@ -98,172 +98,224 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     takeGems: (playerId, take) => {
-        let success = false;
+        const state = get();
+        if (state.currentPlayerIndex !== playerId) return;
+
+        const p = state.players[playerId];
+        const takeEntries = Object.entries(take).filter(([_, amount]) => (amount as number) > 0) as [GemType, number][];
+        const totalTake = takeEntries.reduce((sum, [_, amount]) => sum + amount, 0);
+
+        // Validation: 2 same or 3 different
+        if (takeEntries.length === 1) {
+            const [gem, amount] = takeEntries[0];
+            if (amount !== 2) throw new Error('Must take exactly 2 gems of the same type');
+            if (gem === GemType.Gold) throw new Error('Cannot take Gold gems normally');
+            if (state.bank[gem] < 4) throw new Error('Cannot take 2 gems if bank has fewer than 4');
+        } else if (takeEntries.length === 3) {
+            if (takeEntries.some(([_, amount]) => amount !== 1)) throw new Error('Must take exactly 1 each of 3 different types');
+            if (takeEntries.some(([gem, _]) => gem === GemType.Gold)) throw new Error('Cannot take Gold gems normally');
+        } else if (takeEntries.length > 0) {
+            throw new Error('Must take exactly 2 gems of the same type or 3 gems of different types');
+        } else {
+            return; // No gems selected
+        }
+
+        // Check if bank has enough
+        for (const [gem, amount] of takeEntries) {
+            if (state.bank[gem] < amount) throw new Error(`Not enough ${gem} in bank`);
+        }
+
+        // Check total gems after take
+        const currentTotal = Object.values(p.gems).reduce((s, v) => s + v, 0);
+        if (currentTotal + totalTake > 10) throw new Error('Player cannot have more than 10 gems');
+
         set(state => {
-            if (state.currentPlayerIndex !== playerId) return state;
-            const p = { ...state.players[playerId] };
-            const b = { ...state.bank };
-            p.gems = { ...p.gems };
+            const newPlayers = [...state.players];
+            const newP = { ...newPlayers[playerId], gems: { ...newPlayers[playerId].gems } };
+            const newBank = { ...state.bank };
 
             let takenStr = '';
-            for (const [gem, amount] of Object.entries(take)) {
-                if (!amount) continue;
-                const g = gem as GemType;
-                p.gems[g] += amount;
-                b[g] -= amount;
-                takenStr += `${amount} ${g} `;
+            for (const [gem, amount] of takeEntries) {
+                newP.gems[gem] += amount;
+                newBank[gem] -= amount;
+                takenStr += `${amount} ${gem} `;
             }
 
-            const newPlayers = [...state.players];
-            newPlayers[playerId] = p;
-            success = true;
+            newPlayers[playerId] = newP;
             return {
                 players: newPlayers,
-                bank: b,
-                history: [...state.history, `${p.name} took ${takenStr}`]
+                bank: newBank,
+                history: [...state.history, `${newP.name} took ${takenStr}`]
             };
         });
-        if (success) get().endTurn();
+        get().endTurn();
     },
 
+
     reserveCard: (playerId, cardId, deckLevel) => {
-        let success = false;
-        set(state => {
-            if (state.currentPlayerIndex !== playerId) return state;
-            const p = { ...state.players[playerId] };
-            const b = { ...state.bank };
+        const state = get();
+        if (state.currentPlayerIndex !== playerId) return;
 
-            if (p.reservedCards.length >= 3) return state;
+        const p = state.players[playerId];
+        if (p.reservedCards.length >= 3) throw new Error('Cannot reserve more than 3 cards');
 
-            let card: Card | undefined;
-            const newState = { ...state };
+        let card: Card | undefined;
+        let newStateProps: Partial<GameState> = {};
 
-            if (cardId) {
-                if (state.visibleCards1.find(c => c.id === cardId)) {
-                    card = state.visibleCards1.find(c => c.id === cardId)!;
-                    newState.visibleCards1 = state.visibleCards1.filter(c => c.id !== cardId);
-                    if (newState.deck1.length) {
-                        newState.visibleCards1.push(newState.deck1[0]);
-                        newState.deck1 = newState.deck1.slice(1);
-                    }
-                } else if (state.visibleCards2.find(c => c.id === cardId)) {
-                    card = state.visibleCards2.find(c => c.id === cardId)!;
-                    newState.visibleCards2 = state.visibleCards2.filter(c => c.id !== cardId);
-                    if (newState.deck2.length) {
-                        newState.visibleCards2.push(newState.deck2[0]);
-                        newState.deck2 = newState.deck2.slice(1);
-                    }
-                } else if (state.visibleCards3.find(c => c.id === cardId)) {
-                    card = state.visibleCards3.find(c => c.id === cardId)!;
-                    newState.visibleCards3 = state.visibleCards3.filter(c => c.id !== cardId);
-                    if (newState.deck3.length) {
-                        newState.visibleCards3.push(newState.deck3[0]);
-                        newState.deck3 = newState.deck3.slice(1);
-                    }
+        if (cardId) {
+            if (state.visibleCards1.find(c => c.id === cardId)) {
+                card = state.visibleCards1.find(c => c.id === cardId)!;
+                newStateProps.visibleCards1 = state.visibleCards1.filter(c => c.id !== cardId);
+                if (state.deck1.length) {
+                    newStateProps.visibleCards1 = [...newStateProps.visibleCards1, state.deck1[0]];
+                    newStateProps.deck1 = state.deck1.slice(1);
                 }
-            } else if (deckLevel) {
-                if (deckLevel === 1 && state.deck1.length) {
-                    card = state.deck1[0]; newState.deck1 = state.deck1.slice(1);
-                } else if (deckLevel === 2 && state.deck2.length) {
-                    card = state.deck2[0]; newState.deck2 = state.deck2.slice(1);
-                } else if (deckLevel === 3 && state.deck3.length) {
-                    card = state.deck3[0]; newState.deck3 = state.deck3.slice(1);
+            } else if (state.visibleCards2.find(c => c.id === cardId)) {
+                card = state.visibleCards2.find(c => c.id === cardId)!;
+                newStateProps.visibleCards2 = state.visibleCards2.filter(c => c.id !== cardId);
+                if (state.deck2.length) {
+                    newStateProps.visibleCards2 = [...newStateProps.visibleCards2, state.deck2[0]];
+                    newStateProps.deck2 = state.deck2.slice(1);
+                }
+            } else if (state.visibleCards3.find(c => c.id === cardId)) {
+                card = state.visibleCards3.find(c => c.id === cardId)!;
+                newStateProps.visibleCards3 = state.visibleCards3.filter(c => c.id !== cardId);
+                if (state.deck3.length) {
+                    newStateProps.visibleCards3 = [...newStateProps.visibleCards3, state.deck3[0]];
+                    newStateProps.deck3 = state.deck3.slice(1);
                 }
             }
+        } else if (deckLevel) {
+            if (deckLevel === 1 && state.deck1.length) {
+                card = state.deck1[0]; newStateProps.deck1 = state.deck1.slice(1);
+            } else if (deckLevel === 2 && state.deck2.length) {
+                card = state.deck2[0]; newStateProps.deck2 = state.deck2.slice(1);
+            } else if (deckLevel === 3 && state.deck3.length) {
+                card = state.deck3[0]; newStateProps.deck3 = state.deck3.slice(1);
+            }
+        }
 
-            if (!card) return state;
+        if (!card) throw new Error('Card not found');
 
-            p.reservedCards = [...p.reservedCards, card];
+        set(state => {
+            const newPlayers = [...state.players];
+            const newP = {
+                ...state.players[playerId],
+                gems: { ...state.players[playerId].gems },
+                reservedCards: [...state.players[playerId].reservedCards, card!]
+            };
+            const newBank = { ...state.bank };
 
             let gotGold = false;
-            if (b[GemType.Gold] > 0) {
-                b[GemType.Gold]--;
-                p.gems = { ...p.gems, [GemType.Gold]: p.gems[GemType.Gold] + 1 };
+            const currentTotal = Object.values(newP.gems).reduce((s, v) => s + v, 0);
+            if (newBank[GemType.Gold] > 0 && currentTotal < 10) {
+                newBank[GemType.Gold]--;
+                newP.gems[GemType.Gold]++;
                 gotGold = true;
             }
 
-            newState.players = [...state.players];
-            newState.players[playerId] = p;
-            newState.bank = b;
-            newState.history = [...state.history, `${p.name} reserved a card${gotGold ? ' and took a Gold' : ''}`];
-            success = true;
-            return newState;
+            newPlayers[playerId] = newP;
+            return {
+                ...state,
+                ...newStateProps,
+                players: newPlayers,
+                bank: newBank,
+                history: [...state.history, `${newP.name} reserved a card${gotGold ? ' and took a Gold' : ''}`]
+            };
         });
-        if (success) get().endTurn();
+        get().endTurn();
     },
 
+
     purchaseCard: (playerId, cardId, fromReserve) => {
-        let success = false;
+        const state = get();
+        if (state.currentPlayerIndex !== playerId) return;
+
+        const p = state.players[playerId];
+        let card: Card | undefined;
+
+        if (fromReserve) {
+            card = p.reservedCards.find(c => c.id === cardId);
+        } else {
+            card = state.visibleCards1.find(c => c.id === cardId) ||
+                state.visibleCards2.find(c => c.id === cardId) ||
+                state.visibleCards3.find(c => c.id === cardId);
+        }
+
+        if (!card) throw new Error('Card not found');
+        if (!get().canAfford(p, card)) throw new Error('Cannot afford card');
+
         set(state => {
-            if (state.currentPlayerIndex !== playerId) return state;
-            const p = { ...state.players[playerId] };
-            const b = { ...state.bank };
+            const newBank = { ...state.bank };
+            const newPlayers = [...state.players];
+            const newP = {
+                ...state.players[playerId],
+                gems: { ...state.players[playerId].gems },
+                cards: [...state.players[playerId].cards],
+                reservedCards: [...state.players[playerId].reservedCards]
+            };
 
-            let card: Card | undefined;
-            let newState = { ...state };
-
-            if (fromReserve) {
-                card = p.reservedCards.find(c => c.id === cardId);
-                if (!card) return state;
-            } else {
-                if (state.visibleCards1.find(c => c.id === cardId)) card = state.visibleCards1.find(c => c.id === cardId);
-                else if (state.visibleCards2.find(c => c.id === cardId)) card = state.visibleCards2.find(c => c.id === cardId);
-                else if (state.visibleCards3.find(c => c.id === cardId)) card = state.visibleCards3.find(c => c.id === cardId);
-            }
-
-            if (!card || !get().canAfford(p, card)) return state;
-
-            // Pay costs
             const playerDiscounts = createEmptyGems();
-            p.cards.forEach(c => { playerDiscounts[c.bonus] += 1; });
+            newP.cards.forEach(c => { playerDiscounts[c.bonus] += 1; });
             let goldNeeded = 0;
 
-            p.gems = { ...p.gems };
-            for (const [gem, cost] of Object.entries(card.costs)) {
+            for (const [gem, cost] of Object.entries(card!.costs)) {
                 const g = gem as GemType;
                 const actualCost = Math.max(0, (cost as number) - playerDiscounts[g]);
-                if (p.gems[g] >= actualCost) {
-                    p.gems[g] -= actualCost;
-                    b[g] += actualCost;
+                if (newP.gems[g] >= actualCost) {
+                    newP.gems[g] -= actualCost;
+                    newBank[g] += actualCost;
                 } else {
-                    goldNeeded += (actualCost - p.gems[g]);
-                    b[g] += p.gems[g];
-                    p.gems[g] = 0;
+                    goldNeeded += (actualCost - newP.gems[g]);
+                    newBank[g] += newP.gems[g];
+                    newP.gems[g] = 0;
                 }
             }
 
             if (goldNeeded > 0) {
-                p.gems[GemType.Gold] -= goldNeeded;
-                b[GemType.Gold] += goldNeeded;
+                newP.gems[GemType.Gold] -= goldNeeded;
+                newBank[GemType.Gold] += goldNeeded;
             }
 
-            p.cards = [...p.cards, card];
-            p.prestige += card.prestige;
+            newP.cards.push(card!);
+            newP.prestige += card!.prestige;
+
+            let newState: Partial<GameState> = {
+                players: newPlayers,
+                bank: newBank,
+                history: [...state.history, `${newP.name} purchased card providing ${card!.bonus}`]
+            };
 
             if (fromReserve) {
-                p.reservedCards = p.reservedCards.filter(c => c.id !== cardId);
+                newP.reservedCards = newP.reservedCards.filter(c => c.id !== cardId);
             } else {
                 if (state.visibleCards1.find(c => c.id === cardId)) {
                     newState.visibleCards1 = state.visibleCards1.filter(c => c.id !== cardId);
-                    if (newState.deck1.length) { newState.visibleCards1.push(newState.deck1[0]); newState.deck1 = newState.deck1.slice(1); }
+                    if (state.deck1.length) {
+                        newState.visibleCards1 = [...newState.visibleCards1, state.deck1[0]];
+                        newState.deck1 = state.deck1.slice(1);
+                    }
                 } else if (state.visibleCards2.find(c => c.id === cardId)) {
                     newState.visibleCards2 = state.visibleCards2.filter(c => c.id !== cardId);
-                    if (newState.deck2.length) { newState.visibleCards2.push(newState.deck2[0]); newState.deck2 = newState.deck2.slice(1); }
+                    if (state.deck2.length) {
+                        newState.visibleCards2 = [...newState.visibleCards2, state.deck2[0]];
+                        newState.deck2 = state.deck2.slice(1);
+                    }
                 } else if (state.visibleCards3.find(c => c.id === cardId)) {
                     newState.visibleCards3 = state.visibleCards3.filter(c => c.id !== cardId);
-                    if (newState.deck3.length) { newState.visibleCards3.push(newState.deck3[0]); newState.deck3 = newState.deck3.slice(1); }
+                    if (state.deck3.length) {
+                        newState.visibleCards3 = [...newState.visibleCards3, state.deck3[0]];
+                        newState.deck3 = state.deck3.slice(1);
+                    }
                 }
             }
 
-            newState.players = [...state.players];
-            newState.players[playerId] = p;
-            newState.bank = b;
-            newState.history = [...state.history, `${p.name} purchased card providing ${card.bonus}`];
-            success = true;
+            newPlayers[playerId] = newP;
             return newState;
         });
-        if (success) get().endTurn();
+        get().endTurn();
     },
+
 
     endTurn: () => {
         set(state => {

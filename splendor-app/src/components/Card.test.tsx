@@ -26,7 +26,11 @@ describe('GameCard', () => {
         expect(onPurchase).toHaveBeenCalled();
 
         fireEvent.contextMenu(cardElement);
-        expect(onReserve).toHaveBeenCalled();
+        expect(onReserve).toHaveBeenCalledTimes(1);
+
+        const reserveBtn = screen.getByTitle('Reserve Card');
+        fireEvent.click(reserveBtn);
+        expect(onReserve).toHaveBeenCalledTimes(2);
     });
 
     it('should show empty prestige if prestige > 0 is false', () => {

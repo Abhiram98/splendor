@@ -27,8 +27,12 @@ const Bank: React.FC = () => {
     };
 
     const submitTake = () => {
-        takeGems(currentPlayer, selectedGems);
-        setSelectedGems({});
+        try {
+            takeGems(currentPlayer, selectedGems);
+            setSelectedGems({});
+        } catch (error: any) {
+            alert(error.message);
+        }
     };
 
     const gems = [GemType.Emerald, GemType.Sapphire, GemType.Ruby, GemType.Diamond, GemType.Onyx, GemType.Gold];

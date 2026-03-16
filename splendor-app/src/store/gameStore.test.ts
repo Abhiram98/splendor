@@ -52,6 +52,33 @@ describe('gameStore', () => {
         state.takeGems(1, { [GemType.Ruby]: 0 });
         state = useGameStore.getState();
         expect(state.players[1].gems.Ruby).toBe(0);
+
+        // Take 2 of same
+        state = useGameStore.getState();
+        state.takeGems(1, { [GemType.Diamond]: 2 });
+        state = useGameStore.getState();
+        expect(state.players[1].gems.Diamond).toBe(2);
+        expect(state.bank.Diamond).toBe(2); // 4 - 2
+
+        // Error cases for takeGems
+        // Wrong amount for single type
+        expect(() => state.takeGems(0, { [GemType.Onyx]: 1 })).toThrow('Must take exactly 2 gems of the same type');
+        // Taking Gold
+        expect(() => state.takeGems(0, { [GemType.Gold]: 2 })).toThrow('Cannot take Gold gems normally');
+        // Bank too low for 2 same
+        state.bank.Ruby = 3;
+        expect(() => state.takeGems(0, { [GemType.Ruby]: 2 })).toThrow('Cannot take 2 gems if bank has fewer than 4');
+        // Taking 2 different
+        expect(() => state.takeGems(0, { [GemType.Onyx]: 1, [GemType.Sapphire]: 1 })).toThrow('Must take exactly 2 gems of the same type or 3 gems of different types');
+        // Not enough in bank
+        state.bank.Onyx = 0;
+        expect(() => state.takeGems(0, { [GemType.Onyx]: 1, [GemType.Sapphire]: 1, [GemType.Emerald]: 1 })).toThrow('Not enough Onyx in bank');
+        // Exceeding 10 gems
+        state.bank.Ruby = 4;
+        state.bank.Onyx = 4;
+        state.bank.Emerald = 4;
+        state.players[0].gems = { Diamond: 3, Sapphire: 3, Emerald: 3, Ruby: 0, Onyx: 0, Gold: 0 };
+        expect(() => state.takeGems(0, { [GemType.Ruby]: 1, [GemType.Onyx]: 1, [GemType.Emerald]: 1 })).toThrow('Player cannot have more than 10 gems');
     });
 
     it('should allow canAfford', () => {
@@ -149,7 +176,7 @@ describe('gameStore', () => {
         expect(state.players[0].reservedCards).toHaveLength(3);
 
         // Turn 6: P0 (try 4th)
-        state.reserveCard(0, null, 1);
+        expect(() => state.reserveCard(0, null, 1)).toThrow('Cannot reserve more than 3 cards');
         state = useGameStore.getState();
 
         expect(state.players[0].reservedCards).toHaveLength(3); // Unchanged
@@ -161,7 +188,7 @@ describe('gameStore', () => {
         let state = useGameStore.getState();
 
         // try non existent card
-        state.reserveCard(0, 'NO_EXIST', undefined);
+        expect(() => state.reserveCard(0, 'NO_EXIST', undefined)).toThrow('Card not found');
         state = useGameStore.getState();
         expect(state.currentPlayerIndex).toBe(0); // turn doesn't advance
     });
@@ -217,12 +244,12 @@ describe('gameStore', () => {
         store.initGame(2);
         let state = useGameStore.getState();
 
-        state.purchaseCard(0, state.visibleCards1[0].id, false);
+        expect(() => state.purchaseCard(0, state.visibleCards1[0].id, false)).toThrow('Cannot afford card');
         state = useGameStore.getState();
         expect(state.players[0].cards).toHaveLength(0); // Cannot afford
 
         state.players[0].gems = { Diamond: 10, Sapphire: 10, Emerald: 10, Ruby: 10, Onyx: 10, Gold: 10 };
-        state.purchaseCard(0, 'NO_EXIST', false);
+        expect(() => state.purchaseCard(0, 'NO_EXIST', false)).toThrow('Card not found');
         state = useGameStore.getState();
         expect(state.players[0].cards).toHaveLength(0);
     });
@@ -277,7 +304,7 @@ describe('gameStore', () => {
         store.initGame(2);
         let state = useGameStore.getState();
 
-        state.purchaseCard(0, 'FAKE', true);
+        expect(() => state.purchaseCard(0, 'FAKE', true)).toThrow('Card not found');
         state = useGameStore.getState();
         expect(state.players[0].reservedCards).toHaveLength(0);
         expect(state.players[0].cards).toHaveLength(0);
@@ -355,7 +382,7 @@ describe('gameStore', () => {
         store.initGame(2);
         let state = useGameStore.getState();
 
-        state.reserveCard(0, null, 4 as any);
+        expect(() => state.reserveCard(0, null, 4 as any)).toThrow('Card not found');
         state = useGameStore.getState();
         expect(state.players[0].reservedCards).toHaveLength(0); // Not reserved
     });

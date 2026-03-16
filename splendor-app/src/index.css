@@ -307,3 +307,34 @@ body {
   border-radius: 4px;
   box-shadow: var(--shadow-sm);
 }
+
+.reserve-btn-overlay {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: var(--gem-gold);
+  color: #333;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.1s, background-color 0.2s;
+}
+
+.reserve-btn-overlay:hover {
+  transform: scale(1.1);
+  background: #ffdb4d;
+  box-shadow: var(--shadow-md);
+}
+
+.reserve-btn-overlay:active {
+  transform: scale(0.95);
+}

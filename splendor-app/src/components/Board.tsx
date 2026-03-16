@@ -13,6 +13,22 @@ export const Board: React.FC = () => {
         purchaseCard, reserveCard, winner
     } = useGameStore();
 
+    const handlePurchase = (cardId: string, fromReserve: boolean) => {
+        try {
+            purchaseCard(currentPlayerIndex, cardId, fromReserve);
+        } catch (error: any) {
+            alert(error.message);
+        }
+    };
+
+    const handleReserve = (cardId: string | null, deckLevel?: 1 | 2 | 3) => {
+        try {
+            reserveCard(currentPlayerIndex, cardId, deckLevel);
+        } catch (error: any) {
+            alert(error.message);
+        }
+    };
+
     useEffect(() => {
         initGame(2);
     }, []);
@@ -49,7 +65,7 @@ export const Board: React.FC = () => {
 
                 {/* Tier 3 */}
                 <div className="card-row">
-                    <div className="deck-pile deck-3" onClick={() => reserveCard(currentPlayerIndex, null, 3)}>
+                    <div className="deck-pile deck-3" onClick={() => handleReserve(null, 3)}>
                         III <br /> ({deck3.length})
                     </div>
                     <div className="market-cards">
@@ -57,8 +73,8 @@ export const Board: React.FC = () => {
                             <GameCard
                                 key={c.id}
                                 card={c}
-                                onPurchase={() => purchaseCard(currentPlayerIndex, c.id, false)}
-                                onReserve={() => reserveCard(currentPlayerIndex, c.id)}
+                                onPurchase={() => handlePurchase(c.id, false)}
+                                onReserve={() => handleReserve(c.id)}
                             />
                         ))}
                     </div>
@@ -66,7 +82,7 @@ export const Board: React.FC = () => {
 
                 {/* Tier 2 */}
                 <div className="card-row">
-                    <div className="deck-pile deck-2" onClick={() => reserveCard(currentPlayerIndex, null, 2)}>
+                    <div className="deck-pile deck-2" onClick={() => handleReserve(null, 2)}>
                         II <br /> ({deck2.length})
                     </div>
                     <div className="market-cards">
@@ -74,8 +90,8 @@ export const Board: React.FC = () => {
                             <GameCard
                                 key={c.id}
                                 card={c}
-                                onPurchase={() => purchaseCard(currentPlayerIndex, c.id, false)}
-                                onReserve={() => reserveCard(currentPlayerIndex, c.id)}
+                                onPurchase={() => handlePurchase(c.id, false)}
+                                onReserve={() => handleReserve(c.id)}
                             />
                         ))}
                     </div>
@@ -83,7 +99,7 @@ export const Board: React.FC = () => {
 
                 {/* Tier 1 */}
                 <div className="card-row">
-                    <div className="deck-pile deck-1" onClick={() => reserveCard(currentPlayerIndex, null, 1)}>
+                    <div className="deck-pile deck-1" onClick={() => handleReserve(null, 1)}>
                         I <br /> ({deck1.length})
                     </div>
                     <div className="market-cards">
@@ -91,8 +107,8 @@ export const Board: React.FC = () => {
                             <GameCard
                                 key={c.id}
                                 card={c}
-                                onPurchase={() => purchaseCard(currentPlayerIndex, c.id, false)}
-                                onReserve={() => reserveCard(currentPlayerIndex, c.id)}
+                                onPurchase={() => handlePurchase(c.id, false)}
+                                onReserve={() => handleReserve(c.id)}
                             />
                         ))}
                     </div>

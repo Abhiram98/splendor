@@ -17,14 +17,14 @@ This roadmap outlines the development progress and future goals for the Splendor
 - [ ] **Noble yields a gem value**
 
 ## Bugs Fixes:
-- [ ] **Bank shouldn't go negative**: Bank value for any gem type shouldn't be negative.
-- [ ] **Player should only draw 2 cards of same gem type or 3 cards of different gem types**
-- [ ] **Player should not be able to take more than 10 gems**
-- [ ] **Game should throw an error if a player tries to take more than 10 gems**
-- [ ] **Game should throw an error if a player tries to take a card that they can't afford. Their turn should not end**
-- [ ] **Player shouldn't be able to take the gold gem without reserving a card**
-- [ ] **Player shouldn't be able to reserve more than 3 cards**
-- [ ] **Along with the right-click to reserve a card, there should be a button to reserve a card**
+- [x] **Bank shouldn't go negative**: Bank value for any gem type shouldn't be negative.
+- [x] **Player should only draw 2 cards of same gem type or 3 cards of different gem types**
+- [x] **Player should not be able to take more than 10 gems**
+- [x] **Game should throw an error if a player tries to take more than 10 gems**
+- [x] **Game should throw an error if a player tries to take a card that they can't afford. Their turn should not end**
+- [x] **Player shouldn't be able to take the gold gem without reserving a card**
+- [x] **Player shouldn't be able to reserve more than 3 cards**
+- [x] **Along with the right-click to reserve a card, there should be a button to reserve a card**
 
 ## Phase 2: User Interface & User Experience 🏗️
 - [x] **Base Layout**: Responsive grid for the game board.

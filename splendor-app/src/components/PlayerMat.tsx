@@ -7,6 +7,15 @@ import { useGameStore } from '../store/gameStore';
 export const PlayerMat: React.FC<{ player: Player, isActive: boolean }> = ({ player, isActive }) => {
     const purchaseCard = useGameStore(state => state.purchaseCard);
 
+    const handlePurchase = (cardId: string) => {
+        if (!isActive) return;
+        try {
+            purchaseCard(player.id, cardId, true);
+        } catch (error: any) {
+            alert(error.message);
+        }
+    };
+
     // Calculate total gems including discounts
     const discounts: Record<GemType, number> = {
         [GemType.Diamond]: 0,
@@ -27,6 +36,9 @@ export const PlayerMat: React.FC<{ player: Player, isActive: boolean }> = ({ pla
                     {player.name} {isActive && <span style={{ fontSize: '0.8rem', color: 'var(--gem-gold)' }}>(Current Turn)</span>}
                 </h3>
                 <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>⭐ {player.prestige}</span>
+            </div>
+            <div style={{ fontSize: '0.8rem', color: totalGems >= 10 ? '#ff4444' : '#888', marginTop: 4 }}>
+                Total Gems: {totalGems}/10
             </div>
 
             <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
@@ -52,7 +64,7 @@ export const PlayerMat: React.FC<{ player: Player, isActive: boolean }> = ({ pla
                             <div key={c.id} style={{ transform: 'scale(0.8)', transformOrigin: 'top left', marginRight: '-20px' }}>
                                 <GameCard
                                     card={c}
-                                    onPurchase={() => isActive && purchaseCard(player.id, c.id, true)}
+                                    onPurchase={() => handlePurchase(c.id)}
                                     onReserve={() => { }}
                                 />
                             </div>
