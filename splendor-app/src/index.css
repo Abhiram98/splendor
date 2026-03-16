@@ -1,0 +1,309 @@
+:root {
+  --font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+  /* Board Game Textures / Colors */
+  --bg-table: #2C1B11;
+  /* Dark wood base */
+  --surface-card: #FDFBF7;
+  /* Slightly off-white cardboard */
+  --surface-noble: #3E3B3A;
+  /* Darker textured cardboard */
+
+  /* Gems styling */
+  --gem-diamond: #F8F9FA;
+  --gem-sapphire: #0D6EFD;
+  --gem-emerald: #198754;
+  --gem-ruby: #DC3545;
+  --gem-onyx: #212529;
+  --gem-gold: #FFC107;
+
+  /* Shadows for physical feel */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.6);
+  --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-table);
+  /* Subdued wood pattern placeholder using radial gradient */
+  background-image: radial-gradient(circle at 50% 50%, #3e2723 0%, #1e110a 100%);
+  color: #fff;
+  font-family: var(--font-family);
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+/* Base Card Style */
+.splendor-card {
+  background-color: var(--surface-card);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  color: #333;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ccc;
+  overflow: hidden;
+  user-select: none;
+}
+
+.splendor-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-md);
+}
+
+/* Noble Tile */
+.noble-tile {
+  background-color: var(--surface-noble);
+  border-radius: 6px;
+  box-shadow: var(--shadow-md);
+  color: #f8f9fa;
+  border: 2px solid #5a5a5a;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  width: 90px;
+  height: 90px;
+  justify-content: space-between;
+}
+
+/* physical Token */
+.gem-token {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-inset), 0 2px 4px rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.1s;
+}
+
+.gem-token:active {
+  transform: scale(0.95);
+}
+
+.gem-Diamond {
+  background: linear-gradient(135deg, #fff, #ddd);
+  color: #333;
+  border-color: #bbb;
+}
+
+.gem-Sapphire {
+  background: linear-gradient(135deg, #0d6efd, #0043a8);
+  color: white;
+}
+
+.gem-Emerald {
+  background: linear-gradient(135deg, #198754, #0f5132);
+  color: white;
+}
+
+.gem-Ruby {
+  background: linear-gradient(135deg, #dc3545, #842029);
+  color: white;
+}
+
+.gem-Onyx {
+  background: linear-gradient(135deg, #444, #111);
+  color: white;
+}
+
+.gem-Gold {
+  background: linear-gradient(135deg, #ffc107, #b38b00);
+  color: #333;
+}
+
+/* Layouts */
+.game-container {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .game-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.board-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.deck-pile {
+  width: 100px;
+  height: 140px;
+  background-color: #4a6fa5;
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+  border: 2px solid white;
+  cursor: pointer;
+}
+
+.deck-1 {
+  background-color: #2F4F4F;
+}
+
+.deck-2 {
+  background-color: #B8860B;
+}
+
+.deck-3 {
+  background-color: #8B0000;
+}
+
+.market-cards {
+  display: flex;
+  gap: 1rem;
+}
+
+.market-card {
+  width: 100px;
+  height: 140px;
+}
+
+.bank-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.bank-token {
+  width: 60px;
+  height: 60px;
+  font-size: 1.2rem;
+  position: relative;
+}
+
+.bank-token .count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: red;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.player-mats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.player-mat {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.player-mat.active {
+  border-color: var(--gem-gold);
+  box-shadow: 0 0 15px rgba(255, 193, 7, 0.4);
+}
+
+.card-cost {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+}
+
+.cost-pip {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.cost-pip-Diamond {
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.cost-pip-Sapphire {
+  background-color: #0d6efd;
+}
+
+.cost-pip-Emerald {
+  background-color: #198754;
+}
+
+.cost-pip-Ruby {
+  background-color: #dc3545;
+}
+
+.cost-pip-Onyx {
+  background-color: #212529;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.card-prestige {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.card-bonus {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  box-shadow: var(--shadow-sm);
+}
