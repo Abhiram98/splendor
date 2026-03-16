@@ -98,6 +98,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     takeGems: (playerId, take) => {
+        let success = false;
         set(state => {
             if (state.currentPlayerIndex !== playerId) return state;
             const p = { ...state.players[playerId] };
@@ -115,16 +116,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
             const newPlayers = [...state.players];
             newPlayers[playerId] = p;
+            success = true;
             return {
                 players: newPlayers,
                 bank: b,
                 history: [...state.history, `${p.name} took ${takenStr}`]
             };
         });
-        get().endTurn();
+        if (success) get().endTurn();
     },
 
     reserveCard: (playerId, cardId, deckLevel) => {
+        let success = false;
         set(state => {
             if (state.currentPlayerIndex !== playerId) return state;
             const p = { ...state.players[playerId] };
@@ -183,12 +186,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
             newState.players[playerId] = p;
             newState.bank = b;
             newState.history = [...state.history, `${p.name} reserved a card${gotGold ? ' and took a Gold' : ''}`];
+            success = true;
             return newState;
         });
-        get().endTurn();
+        if (success) get().endTurn();
     },
 
     purchaseCard: (playerId, cardId, fromReserve) => {
+        let success = false;
         set(state => {
             if (state.currentPlayerIndex !== playerId) return state;
             const p = { ...state.players[playerId] };
@@ -254,9 +259,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
             newState.players[playerId] = p;
             newState.bank = b;
             newState.history = [...state.history, `${p.name} purchased card providing ${card.bonus}`];
+            success = true;
             return newState;
         });
-        get().endTurn();
+        if (success) get().endTurn();
     },
 
     endTurn: () => {
