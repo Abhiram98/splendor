@@ -290,7 +290,7 @@ body {
 .card-header {
   display: flex;
   justify-content: space-between;
-  padding: 4px 8px;
+  padding: 4px 32px 4px 8px;
   background: rgba(0, 0, 0, 0.05);
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
