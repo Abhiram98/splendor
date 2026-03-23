@@ -39,6 +39,9 @@ This roadmap outlines the development progress and future goals for the Splendor
     - [ ] Haptic feedback/Sound effects for actions.
     - [ ] Custom card art/placeholder improvements.
 - [ ] **Mobile Optimization**: Tailor layout for smaller screens and touch interaction.
+- [ ] **Option to hide the action log, with a minimize button**
+- [ ] **Option to read rules. Opens a new window with the rules.**
+
 
 ## Phase 3: Testing & Quality Assurance 🏗️
 - [x] **Test Setup**: Vitest and React Testing Library integration.
@@ -54,8 +57,12 @@ This roadmap outlines the development progress and future goals for the Splendor
 - [ ] **Persistence**: Save game state to `localStorage` to resume sessions.
 - [ ] **Game Settings**: Support for player count selection and custom names.
 - [ ] **Move History**: A sidebar log of actions with "Undo" capability.
-- [ ] **AI Opponent**: Basic heuristic-based AI for single-player mode.
+- [ ] **AI Opponent**: Basic heuristic-based AI for single-player mode. Levels like easy, medium, hard. 
 - [ ] **Multiplayer**: Socket-based online play for remote gaming.
+- [ ] **Chat box for QA about rules.**
+- [ ] **Option: Noble yields a gem value. By default, nobles do not yield a gem value.**
+
+## Phase 4: Game variants
 
 ---
 *Last Updated: 2026-03-15*

@@ -4,67 +4,51 @@ import type { Player } from '../models/types';
 import { GameCard } from './Card';
 import { useGameStore } from '../store/gameStore';
 
-export const PlayerMat: React.FC<{ player: Player, isActive: boolean }> = ({ player, isActive }) => {
-    const purchaseCard = useGameStore(state => state.purchaseCard);
+export const PlayerMat: React.FC<{ player: Player, isActive: boolean, isMe: boolean }> = ({ player, isActive, isMe }) => {
+    const performAction = useGameStore(state => state.performAction);
+    const playerIndex = useGameStore(state => state.playerIndex);
 
-    const handlePurchase = (cardId: string) => {
-        if (!isActive) return;
-        try {
-            purchaseCard(player.id, cardId, true);
-        } catch (error: any) {
-            alert(error.message);
-        }
+    const handlePurchaseFromReserve = (cardId: string) => {
+        if (!isActive || !isMe) return;
+        performAction({ type: 'PURCHASE_CARD', cardId, fromReserve: true });
     };
 
-    // Calculate total gems including discounts
-    const discounts: Record<GemType, number> = {
-        [GemType.Diamond]: 0,
-        [GemType.Sapphire]: 0,
-        [GemType.Emerald]: 0,
-        [GemType.Ruby]: 0,
-        [GemType.Onyx]: 0,
-        [GemType.Gold]: 0
+    const totalGems = Object.values(player.gems).reduce((a, b) => a + (b || 0), 0);
+    const discounts = {
+        Diamond: 0, Sapphire: 0, Emerald: 0, Ruby: 0, Onyx: 0, Gold: 0
     };
-    player.cards.forEach(c => { discounts[c.bonus] += 1; });
-
-    const totalGems = Object.values(player.gems).reduce((a, b) => a + b, 0);
+    player.cards.forEach(c => { discounts[c.bonus as keyof typeof discounts] += 1; });
 
     return (
-        <div className={`player-mat ${isActive ? 'active' : ''}`}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3 style={{ margin: 0 }}>
-                    {player.name} {isActive && <span style={{ fontSize: '0.8rem', color: 'var(--gem-gold)' }}>(Current Turn)</span>}
+        <div className={`player-mat ${isActive ? 'active' : ''} ${isMe ? 'is-me' : ''}`}>
+            <div className="mat-header">
+                <h3>
+                    {player.name} {isMe && <span className="me-tag">(You)</span>}
+                    {isActive && <span className="active-dot">●</span>}
                 </h3>
-                <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>⭐ {player.prestige}</span>
-            </div>
-            <div style={{ fontSize: '0.8rem', color: totalGems >= 10 ? '#ff4444' : '#888', marginTop: 4 }}>
-                Total Gems: {totalGems}/10
+                <div className="prestige-score">⭐ {player.prestige}</div>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+            <div className="gem-inventory">
                 {(Object.entries(player.gems) as [GemType, number][]).map(([gem, count]) => (
-                    <div key={gem} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <div className={`gem-token gem-${gem}`} style={{ width: 30, height: 30 }}>{count}</div>
-                        {discounts[gem] > 0 && <div style={{ fontSize: 12, marginTop: 4 }}>+{discounts[gem]} Card</div>}
+                    <div key={gem} className="gem-stack">
+                        <div className={`gem-token mini gem-${gem}`}>{count}</div>
+                        {discounts[gem as keyof typeof discounts] > 0 &&
+                            <div className="discount-badge">+{discounts[gem as keyof typeof discounts]}</div>
+                        }
                     </div>
                 ))}
             </div>
 
-            {player.nobles.length > 0 && (
-                <div style={{ marginTop: 12 }}>
-                    <strong>Nobles:</strong> {player.nobles.length}
-                </div>
-            )}
-
             {player.reservedCards.length > 0 && (
-                <div style={{ marginTop: 16 }}>
-                    <h4 style={{ margin: '0 0 8px 0' }}>Reserved Cards ({player.reservedCards.length}/3)</h4>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                <div className="reserved-section">
+                    <h4>Reserved ({player.reservedCards.length}/3)</h4>
+                    <div className="reserved-cards">
                         {player.reservedCards.map(c => (
-                            <div key={c.id} style={{ transform: 'scale(0.8)', transformOrigin: 'top left', marginRight: '-20px' }}>
+                            <div key={c.id} className="mini-card-wrapper">
                                 <GameCard
                                     card={c}
-                                    onPurchase={() => handlePurchase(c.id)}
+                                    onPurchase={() => handlePurchaseFromReserve(c.id)}
                                     onReserve={() => { }}
                                 />
                             </div>
@@ -72,6 +56,83 @@ export const PlayerMat: React.FC<{ player: Player, isActive: boolean }> = ({ pla
                     </div>
                 </div>
             )}
+
+            <style>{`
+                .player-mat {
+                    background: #2a2a2a;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    border: 2px solid transparent;
+                    transition: border-color 0.3s;
+                    margin-bottom: 1rem;
+                }
+                .player-mat.active {
+                    border-color: #ffd700;
+                    background: #333;
+                }
+                .player-mat.is-me {
+                    background: #252525;
+                    box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.05);
+                }
+                .mat-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 0.5rem;
+                }
+                .me-tag {
+                    font-size: 0.7rem;
+                    color: #ffd700;
+                    margin-left: 8px;
+                    background: #1a1a1a;
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                }
+                .active-dot {
+                    color: #ffd700;
+                    margin-left: 8px;
+                    animation: pulse 1.5s infinite;
+                }
+                @keyframes pulse {
+                    0% { opacity: 1; }
+                    50% { opacity: 0.3; }
+                    100% { opacity: 1; }
+                }
+                .prestige-score {
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                    color: #ffd700;
+                }
+                .gem-inventory {
+                    display: flex;
+                    gap: 0.5rem;
+                }
+                .gem-stack {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 4px;
+                }
+                .discount-badge {
+                    font-size: 10px;
+                    color: #aaa;
+                }
+                .mini-card-wrapper {
+                    transform: scale(0.6);
+                    transform-origin: top left;
+                    width: 60px;
+                    height: 80px;
+                    margin-right: 1.5rem;
+                }
+                .reserved-section {
+                    margin-top: 1rem;
+                }
+                .reserved-cards {
+                    display: flex;
+                    overflow-x: auto;
+                    padding-bottom: 0.5rem;
+                }
+            `}</style>
         </div>
     );
 };
