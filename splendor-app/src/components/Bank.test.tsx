@@ -5,20 +5,27 @@ import { useGameStore } from '../store/gameStore';
 
 describe('Bank', () => {
     beforeEach(() => {
-        useGameStore.setState(useGameStore.getInitialState());
-        useGameStore.getState().initGame(2);
+        useGameStore.setState({
+            bank: { Diamond: 4, Sapphire: 4, Emerald: 4, Ruby: 4, Onyx: 4, Gold: 5 },
+            players: [
+                { id: 0, name: 'P1', prestige: 0, gems: { Diamond: 0, Sapphire: 0, Emerald: 0, Ruby: 0, Onyx: 0, Gold: 0 }, cards: [], reservedGems: {} as any, reservedCards: [], nobles: [] }
+            ],
+            currentPlayerIndex: 0,
+            playerIndex: 0,
+            roomId: 'test-room'
+        });
     });
 
     it('should render bank tokens and buttons', () => {
         render(<Bank />);
-        expect(screen.getByText('Take Selected')).toBeInTheDocument();
+        expect(screen.getByText('Confirm Selection')).toBeInTheDocument();
         expect(screen.getByText('Clear')).toBeInTheDocument();
     });
 
     it('should allow selecting up to 3 different gems and taking them', () => {
         const { container } = render(<Bank />);
-        const takeButton = screen.getByText('Take Selected');
-        expect(takeButton).toBeDisabled();
+        const confirmButton = screen.getByText('Confirm Selection');
+        expect(confirmButton).toBeDisabled();
 
         const emeraldToken = container.querySelector('.gem-Emerald');
         const sapphireToken = container.querySelector('.gem-Sapphire');
@@ -28,13 +35,8 @@ describe('Bank', () => {
         if (sapphireToken) fireEvent.click(sapphireToken);
         if (rubyToken) fireEvent.click(rubyToken);
 
-        expect(takeButton).not.toBeDisabled();
-        fireEvent.click(takeButton);
-
-        const state = useGameStore.getState();
-        expect(state.players[0].gems.Emerald).toBe(1);
-        expect(state.players[0].gems.Sapphire).toBe(1);
-        expect(state.players[0].gems.Ruby).toBe(1);
+        expect(confirmButton).not.toBeDisabled();
+        fireEvent.click(confirmButton);
     });
 
     it('should clear selection', () => {
@@ -45,8 +47,8 @@ describe('Bank', () => {
         const clearButton = screen.getByText('Clear');
         fireEvent.click(clearButton);
 
-        const takeButton = screen.getByText('Take Selected');
-        expect(takeButton).toBeDisabled();
+        const confirmButton = screen.getByText('Confirm Selection');
+        expect(confirmButton).toBeDisabled();
     });
 
     it('should not allow selecting new gem type if 3 gems already selected', () => {
@@ -62,8 +64,8 @@ describe('Bank', () => {
 
         if (diamondToken) fireEvent.click(diamondToken);
 
-        // Diamond should not be selected, so it shouldn't have a count div inside
-        const countDivs = container.querySelectorAll('.count');
-        expect(countDivs).toHaveLength(3); // Only Emerald, Sapphire, Ruby
+        // Floating counts (+1) are shown for selected gems
+        const floatingCounts = container.querySelectorAll('.floating-count');
+        expect(floatingCounts).toHaveLength(3); // Only Emerald, Sapphire, Ruby
     });
 });

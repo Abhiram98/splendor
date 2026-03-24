@@ -6,14 +6,12 @@ import { useGameStore } from '../store/gameStore';
 
 export const PlayerMat: React.FC<{ player: Player, isActive: boolean, isMe: boolean }> = ({ player, isActive, isMe }) => {
     const performAction = useGameStore(state => state.performAction);
-    const playerIndex = useGameStore(state => state.playerIndex);
 
     const handlePurchaseFromReserve = (cardId: string) => {
         if (!isActive || !isMe) return;
         performAction({ type: 'PURCHASE_CARD', cardId, fromReserve: true });
     };
 
-    const totalGems = Object.values(player.gems).reduce((a, b) => a + (b || 0), 0);
     const discounts = {
         Diamond: 0, Sapphire: 0, Emerald: 0, Ruby: 0, Onyx: 0, Gold: 0
     };

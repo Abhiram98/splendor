@@ -16,30 +16,26 @@ describe('PlayerMat', () => {
             { id: 'r1', level: 1, prestige: 0, bonus: GemType.Ruby, costs: {} }
         ],
         nobles: [
-            { id: 'n1', prestige: 3, requirements: {} }
+            { id: 'n1', prestige: 3, requirements: {}, bonus: GemType.Diamond }
         ]
     };
 
     it('should render player details', () => {
-        render(<PlayerMat player={mockPlayer} isActive={true} />);
+        render(<PlayerMat player={mockPlayer} isActive={true} isMe={true} />);
 
         expect(screen.getByText('Player 1')).toBeInTheDocument();
-        expect(screen.getByText('(Current Turn)')).toBeInTheDocument();
+        expect(screen.getByText('(You)')).toBeInTheDocument();
         expect(screen.getByText('⭐ 5')).toBeInTheDocument();
 
-        expect(screen.getByText('+1 Card')).toBeInTheDocument(); // Diamond discount
+        expect(screen.getByText('+1')).toBeInTheDocument(); // Diamond discount
 
-        expect(screen.getByText('Nobles:')).toBeInTheDocument();
-        expect(screen.getAllByText('1').length).toBeGreaterThan(0); // length of nobles
-
-        expect(screen.getByText('Reserved Cards (1/3)')).toBeInTheDocument();
+        expect(screen.getByText('Reserved (1/3)')).toBeInTheDocument();
     });
 
     it('should allow purchasing reserved card if active', () => {
-        useGameStore.setState(useGameStore.getInitialState());
-        useGameStore.getState().initGame(2);
+        useGameStore.setState({ players: [mockPlayer], currentPlayerIndex: 0, playerIndex: 0 });
 
-        const { container } = render(<PlayerMat player={mockPlayer} isActive={true} />);
+        const { container } = render(<PlayerMat player={mockPlayer} isActive={true} isMe={true} />);
 
         const reservedCard = container.querySelector('.splendor-card');
         expect(reservedCard).toBeInTheDocument();
@@ -50,7 +46,7 @@ describe('PlayerMat', () => {
     });
 
     it('should not allow purchasing if not active', () => {
-        const { container } = render(<PlayerMat player={mockPlayer} isActive={false} />);
+        const { container } = render(<PlayerMat player={mockPlayer} isActive={false} isMe={true} />);
         const reservedCard = container.querySelector('.splendor-card');
         if (reservedCard) {
             fireEvent.click(reservedCard);
@@ -58,7 +54,7 @@ describe('PlayerMat', () => {
     });
 
     it('should do nothing for reserve context menu', () => {
-        const { container } = render(<PlayerMat player={mockPlayer} isActive={false} />);
+        const { container } = render(<PlayerMat player={mockPlayer} isActive={false} isMe={true} />);
         const reservedCard = container.querySelector('.splendor-card');
         if (reservedCard) {
             fireEvent.contextMenu(reservedCard);

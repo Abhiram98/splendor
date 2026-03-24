@@ -57,5 +57,4 @@ export interface GameState {
 export type Action =
     | { type: 'TAKE_GEMS'; gems: Partial<GemCount> }
     | { type: 'PURCHASE_CARD'; cardId: string; fromReserve: boolean }
-    | { type: 'RESERVE_CARD'; cardId: string; takeGold: boolean }
-    | { type: 'RESERVE_BLIND'; level: 1 | 2 | 3; takeGold: boolean };
+    | { type: 'RESERVE_CARD'; cardId: string | null; deckLevel?: 1 | 2 | 3 };
