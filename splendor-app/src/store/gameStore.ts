@@ -33,7 +33,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     error: null,
 
     connect: (roomId, playerName) => {
-        const socket = io('http://localhost:3001'); // In prod, this would be dynamic
+        const isProd = import.meta.env.PROD;
+        const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ||
+            (isProd ? `${window.location.protocol}//${window.location.hostname}:3001` : 'http://localhost:3001');
+        const socket = io(SOCKET_URL);
 
         socket.on('connect', () => {
             console.log('Connected to server');
